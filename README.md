@@ -8,7 +8,7 @@ A dead simple, zero-dependency, promise-based typescript library for extracting 
 ## Installation
 
 ```
-npm install --save rgbaster
+npm install --save rgbaster-plus
 ```
 
 ## Usage
@@ -25,7 +25,7 @@ the most dominant color at index 0, secondary at index 1, so on and so forth.
 ```
 
 ```javascript
-import analyze from "rgbaster";
+import analyze from "rgbaster-plus";
 
 const result = await analyze("/2px-blue-and-1px-red-image.png"); // also supports base64 encoded image strings
 
@@ -50,7 +50,7 @@ const result = await analyze("/image.png", { ignore: ["rgb(255,255,255)", "rgb(0
 
 #### `scale`
 
-In order to achieve greater speed, you can have `rgbaster` scale down the image we use internally prior to analysis, thus decreasing accuracy.
+In order to achieve greater speed, you can have `rgbaster-plus` scale down the image we use internally prior to analysis, thus decreasing accuracy.
 
 ```js
 const result = await analyze("/image.png", { scale: 0.6 });

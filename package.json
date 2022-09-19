@@ -1,11 +1,13 @@
 {
   "name": "rgbaster-plus",
   "private": false,
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "A dead simple typescript library for extracting the dominant color(s) from an image.",
   "type": "module",
   "keywords": [
     "rgb",
+    "rgba",
+    "image",
     "typescript"
   ],
   "main": "lib/rgbaster-plus.umd.js",

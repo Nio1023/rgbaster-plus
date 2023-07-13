@@ -17,5 +17,6 @@
     "noImplicitReturns": true,
     "skipLibCheck": true
   },
+  "types": ["offscreencanvas"],
   "include": ["src", "vite.config.ts"]
 }

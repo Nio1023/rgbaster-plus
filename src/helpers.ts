@@ -7,35 +7,67 @@ type CountMap = {
   [T: string]: Count;
 };
 
-export const getContext = (width: string, height: string) => {
-  const canvas = document.createElement("canvas");
-  canvas.setAttribute("width", width);
-  canvas.setAttribute("height", height);
-  return canvas.getContext("2d");
+export const getContext = (width: number, height: number) => {
+  if (!isWebWorker()) {
+    const canvas = document.createElement("canvas");
+    canvas.setAttribute("width", String(width));
+    canvas.setAttribute("height", String(height));
+    return canvas.getContext("2d");
+  } else {
+    const canvas = new OffscreenCanvas(width, height);
+    return canvas.getContext("2d");
+  }
 };
 
-export const getImageData = (src: string, scale: number = 1): Promise<Uint8ClampedArray> => {
-  const img = new Image();
+export const isWebWorker = () => {
+  return typeof window === "undefined" && typeof document === "undefined";
+};
 
-  if (!src.startsWith("data")) img.crossOrigin = "Anonymous";
+export const getImageData = async (
+  src: string,
+  scale: number = 1
+): Promise<Uint8ClampedArray> => {
+  if (!isWebWorker()) {
+    const img = new Image();
 
-  return new Promise((resolve, reject) => {
-    img.onload = function () {
-      const width = img.width * scale;
-      const height = img.height * scale;
-      const context = getContext(String(width), String(height));
-      context!.drawImage(img, 0, 0, width, height);
+    if (!src.startsWith("data")) img.crossOrigin = "Anonymous";
 
-      const { data } = context!.getImageData(0, 0, width, height);
-      resolve(data);
-    };
+    return new Promise((resolve, reject) => {
+      img.onload = function () {
+        const width = img.width * scale;
+        const height = img.height * scale;
+        const context = getContext(width, height);
+        context!.drawImage(img, 0, 0, width, height);
 
-    const errorHandler = () => reject(new Error("An error occurred attempting to load image"));
+        const { data } = context!.getImageData(0, 0, width, height);
+        resolve(data);
+      };
 
-    img.onerror = errorHandler;
-    img.onabort = errorHandler;
-    img.src = src;
-  });
+      const errorHandler = () =>
+        reject(new Error("An error occurred attempting to load image"));
+
+      img.onerror = errorHandler;
+      img.onabort = errorHandler;
+      img.src = src;
+    });
+  } else {
+    return new Promise((resolve, reject) => {
+      fetch(src)
+        .then((resp) => resp.blob())
+        .then((blob) => createImageBitmap(blob))
+        .then((imageBitmap) => {
+          const width = imageBitmap.width * scale;
+          const height = imageBitmap.height * scale;
+          const context = getContext(width, height);
+          context!.drawImage(imageBitmap, 0, 0, width, height);
+          const { data } = context!.getImageData(0, 0, width, height);
+          resolve(data);
+        })
+        .catch(() => {
+          reject(new Error("An error occurred attempting to load image"));
+        });
+    });
+  }
 };
 
 export const getCounts = (data: Uint8ClampedArray, ignore: string[]): [] => {
